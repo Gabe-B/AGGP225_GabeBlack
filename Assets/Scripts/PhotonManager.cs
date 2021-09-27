@@ -16,7 +16,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	RoomOptions roomOptions = new RoomOptions();
 
 	string gameVersion = "1";
-	string gameLevel = "Chat Room";
+	string gameLevel = "FPS";
 
 	void Awake()
 	{
