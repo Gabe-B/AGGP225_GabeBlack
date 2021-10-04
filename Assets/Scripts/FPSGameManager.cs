@@ -8,7 +8,15 @@ using UnityEngine.SceneManagement;
 public class FPSGameManager : MonoBehaviour
 {
     public GameObject playerPrefab;
+    public GameObject playerInstace;
     public List<GameObject> spawnPoints = new List<GameObject>();
+
+    public FPSGameManager instance { get; set; }
+
+    void Awake()
+    {
+        instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -19,16 +27,23 @@ public class FPSGameManager : MonoBehaviour
 
             return;
 		}
-
-        if(playerPrefab)
-		{
-            GameObject spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count - 1)];
-            playerPrefab = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
-		}
-		else
-		{
-            Debug.Log("[FPSGameManager] There is no player prefab attached");
-		}
+        else
+        {
+            if(instance == this)
+            {
+                if (playerPrefab)
+                {
+                    GameObject spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count - 1)];
+                    GameObject player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
+                    player.GetComponent<FPSPlayerManager>().playerCam.gameObject.GetComponent<Camera>().enabled = true;
+                    player.GetComponent<FPSPlayerManager>().nameText = PhotonManager.instance.gameObject.GetPhotonView().RPC("FPSUsernameRPC", RpcTarget.AllBuffered, PhotonManager.instance.username.ToString());
+                }
+                else
+                {
+                    Debug.Log("[FPSGameManager] There is no player prefab attached");
+                }
+            }
+        }
     }
 
     // Update is called once per frame

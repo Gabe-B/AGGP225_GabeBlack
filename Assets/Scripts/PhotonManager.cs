@@ -12,6 +12,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
 	public string username;
 	public GameObject playerPrefab;
+	public GameObject connectedText;
 
 	RoomOptions roomOptions = new RoomOptions();
 
@@ -52,7 +53,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 		{
 			PhotonNetwork.ConnectUsingSettings();
 			PhotonNetwork.GameVersion = gameVersion;
+			connectedText.SetActive(true);
 		}
+		else
+        {
+			connectedText.SetActive(false);
+        }
 	}
 
 	public void CreateRoom()
@@ -97,7 +103,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	{
 		Debug.Log("[PhotonManager][OnJoinedRoom]");
 
-		PhotonNetwork.LoadLevel(gameLevel);
+		if(PhotonNetwork.IsMasterClient)
+        {
+			PhotonNetwork.LoadLevel(gameLevel);
+		}
 	}
 
 	public override void OnDisconnected(DisconnectCause cause)
@@ -136,5 +145,11 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	void UsernameRPC(string _username, string _chat)
 	{
 		Username.instance.field.text += _username + ":	" + _chat + "\n";
+	}
+
+	[PunRPC]
+	string FPSUsernameRPC(string _username)
+	{
+		return _username;
 	}
 }
