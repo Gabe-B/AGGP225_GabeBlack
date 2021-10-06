@@ -36,7 +36,7 @@ public class FPSGameManager : MonoBehaviour
                     GameObject spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count - 1)];
                     GameObject player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.transform.position, Quaternion.identity);
                     player.GetComponent<FPSPlayerManager>().playerCam.gameObject.GetComponent<Camera>().enabled = true;
-                    player.GetComponent<FPSPlayerManager>().nameText = PhotonManager.instance.gameObject.GetPhotonView().RPC("FPSUsernameRPC", RpcTarget.AllBuffered, PhotonManager.instance.username.ToString());
+                    PhotonManager.instance.gameObject.GetPhotonView().RPC("FPSUsernameRPC", RpcTarget.AllBuffered, PhotonManager.instance.username.ToString());
                 }
                 else
                 {

@@ -281,6 +281,7 @@ MonoBehaviour:
   groundCheckDeadZone: 0.05
   stepHeight: 0.5
   pauseMenu: {fileID: 443913469215350695}
+  nameText: {fileID: 4869709335329220141}
 --- !u!54 &6423089845592636114
 Rigidbody:
   m_ObjectHideFlags: 0

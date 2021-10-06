@@ -23,11 +23,18 @@ public class FPSPlayerManager : MonoBehaviour
     public GameObject pauseMenu;
     public TMP_Text nameText;
 
+    public static FPSPlayerManager instance;
+
     bool groundCheck;
     float cameraPitch = 0f;
 
     bool forwards, backwards, left, right = false;
     Vector2 leftStick, rightStick = Vector2.zero;
+
+    void Awake()
+    {
+        instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()
