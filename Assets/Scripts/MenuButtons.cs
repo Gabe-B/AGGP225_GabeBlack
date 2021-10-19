@@ -9,6 +9,7 @@ public class MenuButtons : MonoBehaviour
 {
 
 	public TMP_InputField inputField;
+	public GameObject pleaseInputText;
 
 	public static MenuButtons instance;
 
@@ -19,12 +20,36 @@ public class MenuButtons : MonoBehaviour
 
 	public void OnCreateRoomClick()
 	{
-		PhotonManager.instance.CreateRoom();
+		if (!string.IsNullOrEmpty(inputField.text))
+		{
+			PhotonManager.instance.username = inputField.text;
+
+			if (PhotonManager.instance != null)
+			{
+				PhotonManager.instance.CreateRoom();
+			}
+		}
+		else
+		{
+			pleaseInputText.SetActive(true);
+		}
 	}
 
 	public void OnJoinRandomRoomClick()
 	{
-		PhotonManager.instance.JoinRandomRoom();
+		if (!string.IsNullOrEmpty(inputField.text))
+		{
+			PhotonManager.instance.username = inputField.text;
+
+			if (PhotonManager.instance != null)
+			{
+				PhotonManager.instance.JoinRandomRoom();
+			}
+		}
+		else
+		{
+			pleaseInputText.SetActive(true);
+		}
 	}
 
 	public void OnJoinChatroomClick()
@@ -40,7 +65,7 @@ public class MenuButtons : MonoBehaviour
 		}
 		else
 		{
-			Debug.LogError("[MenuButtons][OnJoinChatroomClick][Unable to join random room. PhotonManager unable to be found]");
+			pleaseInputText.SetActive(true);
 		}
 	}
 

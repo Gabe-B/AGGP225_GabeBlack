@@ -7,6 +7,7 @@ using TMPro;
 
 public class FPSPlayerManager : MonoBehaviour
 {
+    #region Player vars
     public GameObject playerObj;
     public Rigidbody rb;
     public Transform playerCam;
@@ -19,21 +20,42 @@ public class FPSPlayerManager : MonoBehaviour
     public float groundCheckDist = 1.0f;
     public float groundCheckDeadZone = 0.05f;
     public float stepHeight = 0.5f;
-
-    public GameObject pauseMenu;
-    public TMP_Text nameText;
-
-    public static FPSPlayerManager instance;
-
+    public int maxHealth = 100;
+    public int currHealth;
     bool groundCheck;
     float cameraPitch = 0f;
 
     bool forwards, backwards, left, right = false;
     Vector2 leftStick, rightStick = Vector2.zero;
+    #endregion
+
+    #region Weapon vars
+    public Transform projectileSpawn;
+    public GameObject projectilePrefab;
+    #endregion
+
+    #region UI
+    public GameObject pauseMenu;
+    public TMP_Text nameText;
+    public FPSHealthBar healthBar;
+    public TMP_Text healthText;
+    #endregion
+
+    public List<GameObject> spawnPoints = new List<GameObject>();
+    public Animator weaponAnim;
+    public Animator playerAnim;
+    public AudioSource walkingSource;
+    public Transform FootStepSpawn;
+    public GameObject FootStepObj;
+    public GameObject FootStepInstance;
+    public GameObject WeaponSoundPrefab;
 
     void Awake()
     {
-        instance = this;
+        currHealth = maxHealth;
+        healthBar.SetMaxHealth(maxHealth);
+        healthText.text = maxHealth.ToString();
+        gameObject.GetPhotonView().RPC("FPSUsernameRPC", RpcTarget.AllBuffered);
     }
 
     // Start is called before the first frame update
@@ -54,19 +76,83 @@ public class FPSPlayerManager : MonoBehaviour
         leftStick = Vector2.zero;
         rightStick = Vector2.zero;
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (gameObject.GetPhotonView().IsMine)
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            pauseMenu.SetActive(true);
-        }
 
-        if (!pauseMenu.activeSelf)
-        {
-            GetInput();
-            MoveStrafe(leftStick);
-            RotateRight(rightStick.x);
-            CameraPitch(rightStick.y);
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                pauseMenu.SetActive(true);
+            }
+
+            if (currHealth <= 0)
+            {
+                gameObject.GetPhotonView().RPC("isDead", RpcTarget.AllBuffered);
+            }
+
+            if (!pauseMenu.activeSelf)
+            {
+                GetInput();
+                MoveStrafe(leftStick);
+                RotateRight(rightStick.x);
+                CameraPitch(rightStick.y);
+
+                if (forwards)
+                {
+                    if(!walkingSource.isPlaying)
+                    {
+                        walkingSource.Play();
+                    }
+                    gameObject.GetPhotonView().RPC("PlayWalkSound", RpcTarget.All);
+                    playerAnim.SetBool("IsMoving", true);
+                }
+                else if (backwards)
+                {
+                    if (!walkingSource.isPlaying)
+                    {
+                        walkingSource.Play();
+                    }
+                    gameObject.GetPhotonView().RPC("PlayWalkSound", RpcTarget.All);
+                    playerAnim.SetBool("IsMoving", true);
+                }
+                else if (left)
+                {
+                    if (!walkingSource.isPlaying)
+                    {
+                        walkingSource.Play();
+                    }
+                    gameObject.GetPhotonView().RPC("PlayWalkSound", RpcTarget.All);
+                    playerAnim.SetBool("IsMoving", true);
+                }
+                else if (right)
+                {
+                    if (!walkingSource.isPlaying)
+                    {
+                        walkingSource.Play();
+                    }
+                    gameObject.GetPhotonView().RPC("PlayWalkSound", RpcTarget.All);
+                    playerAnim.SetBool("IsMoving", true);
+                }
+                else
+                {
+                    if (walkingSource.isPlaying)
+                    {
+                        walkingSource.Stop();
+                    }
+                    playerAnim.SetBool("IsMoving", false);
+                }
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    weaponAnim.SetBool("Fire", true);
+                    FireWeapon();
+                }
+                else if (Input.GetMouseButtonUp(0))
+                {
+                    weaponAnim.SetBool("Fire", false);
+                }
+            }
         }
 
         CheckForGround();
@@ -78,9 +164,67 @@ public class FPSPlayerManager : MonoBehaviour
         }
     }
 
+    void FireWeapon()
+    {
+        if (gameObject.GetPhotonView().IsMine)
+        {
+            GameObject s = PhotonNetwork.Instantiate(WeaponSoundPrefab.name, projectileSpawn.position, projectileSpawn.rotation);
+            PhotonNetwork.Instantiate(projectilePrefab.name, projectileSpawn.position, projectileSpawn.rotation);
+
+            if(!s.GetComponent<AudioSource>().isPlaying)
+            {
+                Destroy(s);
+            }
+        }
+    }
+
+    #region RPC's
+    [PunRPC]
+    public void TakeDamage(int damage)
+    {
+        currHealth -= damage;
+        healthText.text = currHealth.ToString();
+        healthBar.SetHealth(currHealth);
+    }
+
+    [PunRPC]
+    public void isDead()
+    {
+        currHealth += maxHealth;
+        healthText.text = currHealth.ToString();
+        healthBar.SetHealth(currHealth);
+        GameObject spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count - 1)];
+        gameObject.transform.position = spawnPoint.transform.position;
+    }
+
+    [PunRPC]
+    void FPSUsernameRPC()
+    {
+        nameText.text = gameObject.GetPhotonView().Owner.NickName;
+    }
+
+    [PunRPC]
+    void PlayWalkSound()
+    {
+        if(!gameObject.GetPhotonView().IsMine)
+        {
+            if (FootStepInstance == null)
+            {
+                FootStepInstance = PhotonNetwork.Instantiate(FootStepObj.name, FootStepSpawn.transform.position, FootStepSpawn.transform.rotation);
+                Destroy(FootStepInstance);
+            }
+            else
+            {
+                Destroy(FootStepInstance);
+            }
+        }
+    }
+    #endregion
+
+    #region Movement Methods
     void CameraPitch(float value)
     {
-        if(gameObject.GetPhotonView().IsMine)
+        if (gameObject.GetPhotonView().IsMine)
         {
             cameraPitch -= (value * vertSensitivity);
             cameraPitch = Mathf.Clamp(cameraPitch, minClamp, maxClamp);
@@ -90,10 +234,10 @@ public class FPSPlayerManager : MonoBehaviour
 
     void RotateRight(float value)
     {
-        if(gameObject.GetPhotonView().IsMine)
+        if (gameObject.GetPhotonView().IsMine)
         {
             gameObject.transform.Rotate(Vector3.up * value * Time.deltaTime * horizSensitivity);
-        }   
+        }
     }
 
     void GetInput()
@@ -168,4 +312,5 @@ public class FPSPlayerManager : MonoBehaviour
             }
         }
     }
+    #endregion
 }

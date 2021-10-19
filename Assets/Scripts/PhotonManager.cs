@@ -17,7 +17,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	RoomOptions roomOptions = new RoomOptions();
 
 	string gameVersion = "1";
-	string gameLevel = "Chat Room";
+	string gameLevel = "FPS";
 
 	void Awake()
 	{
@@ -44,10 +44,10 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 		Connect();
 	}
 
-	/// <summary>
-	/// Connects user to master server
-	/// </summary>
-	public void Connect()
+    /// <summary>
+    /// Connects user to master server
+    /// </summary>
+    public void Connect()
 	{
 		if (!PhotonNetwork.IsConnected)
 		{
@@ -65,7 +65,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	{
 		Debug.Log("[PhotonManager][CreateRoom][Trying to create room]");
 
-		username = MenuButtons.instance.inputField.text;
+		PhotonNetwork.NickName = MenuButtons.instance.inputField.text;
 
 		PhotonNetwork.CreateRoom("Test Room", roomOptions);
 	}
@@ -74,7 +74,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	{
 		Debug.Log("[PhotonManager][JoinRandomRoom][Trying to join random room]");
 
-		username = MenuButtons.instance.inputField.text;
+		PhotonNetwork.NickName = MenuButtons.instance.inputField.text;
 
 		PhotonNetwork.JoinRandomRoom();
 	}
@@ -83,7 +83,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	{
 		Debug.Log("[PhotonManager][JoinChatroom][Trying to join random room]");
 
-		username = MenuButtons.instance.inputField.text;
+		PhotonNetwork.NickName = MenuButtons.instance.inputField.text;
 
 		PhotonNetwork.JoinRandomRoom();
 	}
@@ -128,6 +128,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
 	public override void OnLeftRoom()
 	{
+		Cursor.lockState = CursorLockMode.None;
+		Cursor.visible = true;
 		SceneManager.LoadScene("Main Menu");
 	}
 
@@ -148,8 +150,21 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	}
 
 	[PunRPC]
-	void FPSUsernameRPC(string _username)
+	void FPSUsernameRPC(string  _username, string nameField)
 	{
-		FPSPlayerManager.instance.nameText.text = username;
+		nameField = _username;
+	}
+
+	[PunRPC]
+	void UpdateTimer(float t)
+	{
+        foreach (FPSGameManager gm in FindObjectsOfType<FPSGameManager>())
+        {
+			//gm.matchTime -= Time.deltaTime;
+			gm.timer.text = Mathf.Round(t).ToString();
+		}
+
+		/*FPSGameManager.instance.timer.text = Mathf.Round(FPSGameManager.instance.matchTime).ToString();
+		FPSGameManager.instance.matchTime -= Time.deltaTime;*/
 	}
 }
