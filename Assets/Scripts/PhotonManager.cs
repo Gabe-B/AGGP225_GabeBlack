@@ -133,8 +133,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 		SceneManager.LoadScene("Main Menu");
 	}
 
-	#endregion
-
 	void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
 		if (instance != this)
@@ -142,12 +140,20 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 			//PhotonNetwork.Destroy(gameObject);
 		}
 	}
+    #endregion
 
-	[PunRPC]
+    #region RPC's
+    [PunRPC]
 	void UsernameRPC(string _username, string _chat)
 	{
 		Username.instance.field.text += _username + ":	" + _chat + "\n";
 	}
+
+	[PunRPC]
+	void UpdateNames(string _username)
+    {
+		Username.instance.names.text += _username + "\n";
+    }
 
 	[PunRPC]
 	void FPSUsernameRPC(string  _username, string nameField)
@@ -167,4 +173,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 		/*FPSGameManager.instance.timer.text = Mathf.Round(FPSGameManager.instance.matchTime).ToString();
 		FPSGameManager.instance.matchTime -= Time.deltaTime;*/
 	}
+
+	[PunRPC]
+	void AllLeave()
+    {
+		foreach (FPSPlayerManager pm in FindObjectsOfType<FPSPlayerManager>())
+		{
+			//gm.matchTime -= Time.deltaTime;
+			PhotonNetwork.LeaveRoom();
+		}
+	}
+    #endregion
 }

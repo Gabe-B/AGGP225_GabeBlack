@@ -71,7 +71,8 @@ public class FPSGameManager : MonoBehaviour
             {
                 matchTime = 0;
                 isTimerRunning = false;
-                PhotonNetwork.LeaveRoom();
+                //PhotonNetwork.LeaveRoom();
+                PhotonManager.instance.gameObject.GetPhotonView().RPC("AllLeave", RpcTarget.All);
             }
         }
     }

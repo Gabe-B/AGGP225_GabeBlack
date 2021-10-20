@@ -7,9 +7,9 @@ using Photon.Pun;
 
 public class Username : MonoBehaviour
 {
-
 	public TMP_InputField input;
 	public TMP_Text field;
+	public TMP_Text names;
 	public static Username instance;
 
 	private void Awake()
@@ -17,7 +17,15 @@ public class Username : MonoBehaviour
 		instance = this;
 	}
 
-	public void Submit()
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Return))
+        {
+			Submit();
+        }
+    }
+
+    public void Submit()
 	{
 		if (!string.IsNullOrEmpty(input.text))
 		{
