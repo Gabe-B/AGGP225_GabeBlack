@@ -44,10 +44,6 @@ public class FPSPlayerManager : MonoBehaviour
     public List<GameObject> spawnPoints = new List<GameObject>();
     public Animator weaponAnim;
     public Animator playerAnim;
-    public AudioSource walkingSource;
-    public Transform FootStepSpawn;
-    public GameObject FootStepObj;
-    public GameObject FootStepInstance;
     public GameObject WeaponSoundPrefab;
 
     void Awake()
@@ -100,46 +96,23 @@ public class FPSPlayerManager : MonoBehaviour
 
                 if (forwards)
                 {
-                    if(!walkingSource.isPlaying)
-                    {
-                        walkingSource.Play();
-                    }
-                    gameObject.GetPhotonView().RPC("PlayWalkSound", RpcTarget.All);
                     playerAnim.SetBool("IsMoving", true);
                 }
                 else if (backwards)
                 {
-                    if (!walkingSource.isPlaying)
-                    {
-                        walkingSource.Play();
-                    }
-                    gameObject.GetPhotonView().RPC("PlayWalkSound", RpcTarget.All);
                     playerAnim.SetBool("IsMoving", true);
                 }
                 else if (left)
                 {
-                    if (!walkingSource.isPlaying)
-                    {
-                        walkingSource.Play();
-                    }
-                    gameObject.GetPhotonView().RPC("PlayWalkSound", RpcTarget.All);
                     playerAnim.SetBool("IsMoving", true);
                 }
                 else if (right)
                 {
-                    if (!walkingSource.isPlaying)
-                    {
-                        walkingSource.Play();
-                    }
-                    gameObject.GetPhotonView().RPC("PlayWalkSound", RpcTarget.All);
                     playerAnim.SetBool("IsMoving", true);
                 }
                 else
                 {
-                    if (walkingSource.isPlaying)
-                    {
-                        walkingSource.Stop();
-                    }
+
                     playerAnim.SetBool("IsMoving", false);
                 }
 
@@ -201,23 +174,6 @@ public class FPSPlayerManager : MonoBehaviour
     void FPSUsernameRPC()
     {
         nameText.text = gameObject.GetPhotonView().Owner.NickName;
-    }
-
-    [PunRPC]
-    void PlayWalkSound()
-    {
-        if(!gameObject.GetPhotonView().IsMine)
-        {
-            if (FootStepInstance == null)
-            {
-                FootStepInstance = PhotonNetwork.Instantiate(FootStepObj.name, FootStepSpawn.transform.position, FootStepSpawn.transform.rotation);
-                Destroy(FootStepInstance);
-            }
-            else
-            {
-                Destroy(FootStepInstance);
-            }
-        }
     }
     #endregion
 
