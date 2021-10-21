@@ -50,6 +50,11 @@ public class FPSGameManager : MonoBehaviour
                     Debug.Log("[FPSGameManager] There is no player prefab attached");
                 }
             }
+
+            if(PhotonNetwork.IsMasterClient)
+            {
+
+            }
         }
     }
 

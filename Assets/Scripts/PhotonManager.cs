@@ -17,7 +17,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	RoomOptions roomOptions = new RoomOptions();
 
 	string gameVersion = "1";
-	string gameLevel = "FPS";
+	string gameLevel = "Chat Room";
 
 	void Awake()
 	{
@@ -148,12 +148,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	{
 		Username.instance.field.text += _username + ":	" + _chat + "\n";
 	}
-
-	[PunRPC]
-	void UpdateNames(string _username)
-    {
-		Username.instance.names.text += _username + "\n";
-    }
 
 	[PunRPC]
 	void FPSUsernameRPC(string  _username, string nameField)
