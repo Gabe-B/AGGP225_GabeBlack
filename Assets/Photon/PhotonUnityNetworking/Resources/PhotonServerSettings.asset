@@ -52,6 +52,11 @@ MonoBehaviour:
   - NetworkPlayAS
   - AllLeave
   - UpdateNames
+  - UpdateGameTimer
+  - UpdateLobbyTimer
+  - LoadLobby
+  - ChatRPC
+  - ShowWinner
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

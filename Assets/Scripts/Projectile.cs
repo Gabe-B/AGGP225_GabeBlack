@@ -7,6 +7,7 @@ using Photon.Realtime;
 public class Projectile : MonoBehaviour
 {
     public Rigidbody rb;
+    public FPSPlayerManager owner;
 
     public float moveSpeed = 25;
     public int damage = 10;
@@ -42,6 +43,11 @@ public class Projectile : MonoBehaviour
             Destroy(gameObject);
             hasDealtDamage = true;
             p.gameObject.GetPhotonView().RPC("TakeDamage", RpcTarget.AllBuffered, damage);
+
+            if(p.currHealth <= 0)
+            {
+                owner.kills++;
+            }
         }
         else
         {

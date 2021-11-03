@@ -120,6 +120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 6061734994153486117}
+  owner: {fileID: 0}
   moveSpeed: 60
   damage: 5
 --- !u!82 &7459391692090548088

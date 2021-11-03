@@ -21,6 +21,7 @@ public class FPSWeaponSounds : MonoBehaviour
         weaponSound.rolloffMode = AudioRolloffMode.Linear;
         weaponSound.dopplerLevel = 0;
         weaponSound.PlayOneShot(weaponSound.clip);
+        Destroy(gameObject, 0.5f);
     }
 
     // Update is called once per frame

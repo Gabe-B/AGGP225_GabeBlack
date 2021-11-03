@@ -5,6 +5,7 @@ using Photon.Realtime;
 using Photon.Pun;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -13,6 +14,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	public string username;
 	public GameObject playerPrefab;
 	public GameObject connectedText;
+	public TMP_InputField red;
+	public TMP_InputField green;
+	public TMP_InputField blue;
+	public Image color;
+
+	public float RED, GREEN, BLUE;
+	public int MAX_PLAYERS = 4;
 
 	RoomOptions roomOptions = new RoomOptions();
 
@@ -36,7 +44,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 		SceneManager.sceneLoaded += OnSceneLoaded;
 
 		PhotonNetwork.AutomaticallySyncScene = true;
-		roomOptions.MaxPlayers = 4;
+		roomOptions.MaxPlayers = (byte)MAX_PLAYERS;
 	}
 
 	void Start()
@@ -86,6 +94,52 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 		PhotonNetwork.NickName = MenuButtons.instance.inputField.text;
 
 		PhotonNetwork.JoinRandomRoom();
+	}
+
+	public void ChangeColor()
+	{
+		float redVal, greenVal, blueVal;
+
+		if (!string.IsNullOrEmpty(red.ToString()))
+		{
+			float.TryParse(red.text.ToString(), out float resultRed);
+			redVal = resultRed;
+			RED = redVal;
+			red.text = "";
+		}
+		else
+		{
+			redVal = 0;
+			RED = 0;
+		}
+
+		if (!string.IsNullOrEmpty(green.ToString()))
+		{
+			float.TryParse(green.text.ToString(), out float resultGreen);
+			greenVal = resultGreen;
+			GREEN = greenVal;
+			green.text = "";
+		}
+		else
+		{
+			greenVal = 0;
+			GREEN = 0;
+		}
+
+		if (!string.IsNullOrEmpty(blue.ToString()))
+		{
+			float.TryParse(blue.text.ToString(), out float resultBlue);
+			blueVal = resultBlue;
+			BLUE = blueVal;
+			blue.text = "";
+		}
+		else
+		{
+			blueVal = 0;
+			BLUE = 0;
+		}
+
+		color.color = new Color32((byte)redVal, (byte)greenVal, (byte)blueVal, (byte)255);
 	}
 
 	#region Photon Callbacks
@@ -149,6 +203,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 		Username.instance.field.text += _username + ":	" + _chat + "\n";
 	}
 
+	/*[PunRPC]
+	void ChatRPC(string _username, string _chat)
+	{
+		string message = _username + ": " + _chat + "\n";
+		FPSChat.instance.SendMessageToChat(message);
+	}*/
+
 	[PunRPC]
 	void FPSUsernameRPC(string  _username, string nameField)
 	{
@@ -156,7 +217,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	}
 
 	[PunRPC]
-	void UpdateTimer(float t)
+	void UpdateGameTimer(float t)
 	{
         foreach (FPSGameManager gm in FindObjectsOfType<FPSGameManager>())
         {
@@ -169,6 +230,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 	}
 
 	[PunRPC]
+	void UpdateLobbyTimer(float t)
+    {
+        foreach (Username u in FindObjectsOfType<Username>())
+        {
+			u.timer.text = Mathf.Round(t).ToString();
+        }
+    }
+
+	[PunRPC]
 	void AllLeave()
     {
 		foreach (FPSPlayerManager pm in FindObjectsOfType<FPSPlayerManager>())
@@ -177,5 +247,23 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 			PhotonNetwork.LeaveRoom();
 		}
 	}
+
+	[PunRPC]
+    void LoadLobby()
+    {
+		if(PhotonNetwork.IsMasterClient)
+        {
+			PhotonNetwork.LoadLevel("Chat Room");
+        }
+
+		Cursor.lockState = CursorLockMode.None;
+		Cursor.visible = true;
+	}
+
+	[PunRPC]
+	void ShowWinner(string _username, int kills)
+    {
+		Username.instance.winnerText.text = _username + " won the last round with " + kills.ToString() + " kills!";
+    }
     #endregion
 }

@@ -22,6 +22,9 @@ public class FPSPlayerManager : MonoBehaviour
     public float stepHeight = 0.5f;
     public int maxHealth = 100;
     public int currHealth;
+    public List<GameObject> spawnPoints = new List<GameObject>();
+    public int kills = 0;
+
     bool groundCheck;
     float cameraPitch = 0f;
 
@@ -39,19 +42,36 @@ public class FPSPlayerManager : MonoBehaviour
     public TMP_Text nameText;
     public FPSHealthBar healthBar;
     public TMP_Text healthText;
+    public TMP_InputField input;
+    public TMP_Text playerNameField;
+    public GameObject panel, textPrefab;
+    public int maxMessages = 4;
+
+    [SerializeField]
+    public List<Message> messageList = new List<Message>();
     #endregion
 
-    public List<GameObject> spawnPoints = new List<GameObject>();
+    #region MISC
     public Animator weaponAnim;
     public Animator playerAnim;
     public GameObject WeaponSoundPrefab;
+    public Renderer playerRenderer;
+    public bool canMove = true;
+    public float R, G, B;
+    #endregion
+
+    public GameObject p;
 
     void Awake()
     {
+        R = PhotonManager.instance.RED;
+        G = PhotonManager.instance.GREEN;
+        B = PhotonManager.instance.BLUE;
         currHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
         healthText.text = maxHealth.ToString();
         gameObject.GetPhotonView().RPC("FPSUsernameRPC", RpcTarget.AllBuffered);
+        gameObject.GetPhotonView().RPC("ChangeColor", RpcTarget.AllBuffered, R, G, B);
     }
 
     // Start is called before the first frame update
@@ -62,6 +82,8 @@ public class FPSPlayerManager : MonoBehaviour
             rb = playerObj.GetComponent<Rigidbody>();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            playerNameField.text = PhotonNetwork.NickName;
+            input.interactable = false;
         }
     }
 
@@ -82,12 +104,30 @@ public class FPSPlayerManager : MonoBehaviour
                 pauseMenu.SetActive(true);
             }
 
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                input.interactable = true;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                canMove = false;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Return) && (input.interactable = true))
+            {
+                gameObject.GetPhotonView().RPC("ChatRPC", RpcTarget.AllBuffered, playerNameField.text, input.text);
+                input.text = "";
+                input.interactable = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                canMove = true;
+            }
+
             if (currHealth <= 0)
             {
                 gameObject.GetPhotonView().RPC("isDead", RpcTarget.AllBuffered);
             }
 
-            if (!pauseMenu.activeSelf)
+            if (!pauseMenu.activeSelf && canMove)
             {
                 GetInput();
                 MoveStrafe(leftStick);
@@ -142,7 +182,9 @@ public class FPSPlayerManager : MonoBehaviour
         if (gameObject.GetPhotonView().IsMine)
         {
             GameObject s = PhotonNetwork.Instantiate(WeaponSoundPrefab.name, projectileSpawn.position, projectileSpawn.rotation);
-            PhotonNetwork.Instantiate(projectilePrefab.name, projectileSpawn.position, projectileSpawn.rotation);
+            p = PhotonNetwork.Instantiate(projectilePrefab.name, projectileSpawn.position, projectileSpawn.rotation);
+
+            p.GetComponent<Projectile>().owner = this;
 
             if(!s.GetComponent<AudioSource>().isPlaying)
             {
@@ -174,6 +216,24 @@ public class FPSPlayerManager : MonoBehaviour
     void FPSUsernameRPC()
     {
         nameText.text = gameObject.GetPhotonView().Owner.NickName;
+    }
+
+    [PunRPC]
+    void ChangeColor(float r, float g, float b)
+    {
+        Color32 newCol = new Color32((byte)r, (byte)g, (byte)b, (byte)255);
+        playerRenderer.material.color = newCol;
+    }
+
+    [PunRPC]
+    void ChatRPC(string _username, string _chat)
+    {
+        string message = _username + ": " + _chat + "\n";
+
+        foreach(FPSPlayerManager p in FindObjectsOfType<FPSPlayerManager>())
+		{
+            p.SendMessageToChat(message);
+        }
     }
     #endregion
 
@@ -269,4 +329,37 @@ public class FPSPlayerManager : MonoBehaviour
         }
     }
     #endregion
+
+    public void SendMessageToChat(string text)
+    {
+        if (messageList.Count >= maxMessages)
+        {
+            Destroy(messageList[0].textObj.gameObject);
+            messageList.Remove(messageList[0]);
+        }
+
+        Message newMessage = new Message();
+
+        newMessage.text = text;
+
+        GameObject newTextObj = Instantiate(textPrefab, panel.transform);
+
+        newMessage.textObj = newTextObj.GetComponent<TMP_Text>();
+
+        newMessage.textObj.text = newMessage.text;
+
+        messageList.Add(newMessage);
+    }
+}
+
+[System.Serializable]
+public class Message
+{
+    public string text;
+    public TMP_Text textObj;
+
+    public override string ToString()
+    {
+        return text;
+    }
 }

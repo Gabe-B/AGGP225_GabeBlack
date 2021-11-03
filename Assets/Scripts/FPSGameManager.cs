@@ -13,10 +13,12 @@ public class FPSGameManager : MonoBehaviour
     public List<GameObject> spawnPoints = new List<GameObject>();
 
     public TextMeshProUGUI timer;
+    public FPSPlayerManager temp;
 
     public float matchTime = 60.0f;
     bool isTimerRunning = true;
     GameObject player;
+    List<FPSPlayerManager> players = new List<FPSPlayerManager>();
 
     public static FPSGameManager instance { get; set; }
 
@@ -50,11 +52,6 @@ public class FPSGameManager : MonoBehaviour
                     Debug.Log("[FPSGameManager] There is no player prefab attached");
                 }
             }
-
-            if(PhotonNetwork.IsMasterClient)
-            {
-
-            }
         }
     }
 
@@ -69,7 +66,7 @@ public class FPSGameManager : MonoBehaviour
                 {
                     matchTime -= Time.deltaTime;
 
-                    PhotonManager.instance.gameObject.GetPhotonView().RPC("UpdateTimer", RpcTarget.AllBuffered, matchTime);
+                    PhotonManager.instance.gameObject.GetPhotonView().RPC("UpdateGameTimer", RpcTarget.AllBuffered, matchTime);
                 }
             }
             else
@@ -77,7 +74,30 @@ public class FPSGameManager : MonoBehaviour
                 matchTime = 0;
                 isTimerRunning = false;
                 //PhotonNetwork.LeaveRoom();
-                PhotonManager.instance.gameObject.GetPhotonView().RPC("AllLeave", RpcTarget.All);
+
+                PhotonManager.instance.gameObject.GetPhotonView().RPC("LoadLobby", RpcTarget.All);
+
+                foreach (FPSPlayerManager p in FindObjectsOfType<FPSPlayerManager>())
+                {
+                    players.Add(p);
+                }
+
+                if (players.Count != 1)
+                {
+                    for (int i = 1; i < players.Count + 1; i++)
+                    {
+                        temp = players[i];
+
+                        if (temp.kills < players[i - 1].kills)
+                        {
+                            temp = players[i - 1];
+                        }
+                    }
+                }
+                else
+                {
+                    temp = players[0];
+                }
             }
         }
     }
