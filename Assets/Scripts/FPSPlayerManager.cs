@@ -42,7 +42,7 @@ public class FPSPlayerManager : MonoBehaviour
     public TMP_Text nameText;
     public FPSHealthBar healthBar;
     public TMP_Text healthText;
-    public TMP_InputField input;
+    //public TMP_InputField input;
     public TMP_Text playerNameField;
     public GameObject panel, textPrefab;
     public int maxMessages = 4;
@@ -61,6 +61,9 @@ public class FPSPlayerManager : MonoBehaviour
     #endregion
 
     public GameObject p;
+
+    [SerializeField]
+    bool isChatting = false;
 
     void Awake()
     {
@@ -83,7 +86,7 @@ public class FPSPlayerManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
             playerNameField.text = PhotonNetwork.NickName;
-            input.interactable = false;
+            FPSGameManager.instance.input.interactable = false;
         }
     }
 
@@ -106,20 +109,23 @@ public class FPSPlayerManager : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.T))
             {
-                input.interactable = true;
+                FPSGameManager.instance.input.interactable = true;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 canMove = false;
+                isChatting = true;
             }
 
-            if (Input.GetKeyDown(KeyCode.Return) && (input.interactable = true))
+            if (Input.GetKeyDown(KeyCode.Return) && isChatting)
             {
-                gameObject.GetPhotonView().RPC("ChatRPC", RpcTarget.AllBuffered, playerNameField.text, input.text);
-                input.text = "";
-                input.interactable = false;
+                gameObject.GetPhotonView().RPC("ChatRPC", RpcTarget.AllBuffered, playerNameField.text, FPSGameManager.instance.input.text);
+                Debug.Log(FPSGameManager.instance.input.text);
+                FPSGameManager.instance.input.text = "";
+                FPSGameManager.instance.input.interactable = false;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 canMove = true;
+                isChatting = false;
             }
 
             if (currHealth <= 0)
@@ -230,10 +236,9 @@ public class FPSPlayerManager : MonoBehaviour
     {
         string message = _username + ": " + _chat + "\n";
 
-        foreach(FPSPlayerManager p in FindObjectsOfType<FPSPlayerManager>())
-		{
-            p.SendMessageToChat(message);
-        }
+        Debug.Log(message);
+
+        FPSChat.instance.SendMessageToChat(message);
     }
     #endregion
 
@@ -330,7 +335,7 @@ public class FPSPlayerManager : MonoBehaviour
     }
     #endregion
 
-    public void SendMessageToChat(string text)
+    /*public void SendMessageToChat(string text)
     {
         if (messageList.Count >= maxMessages)
         {
@@ -346,12 +351,16 @@ public class FPSPlayerManager : MonoBehaviour
 
         newMessage.textObj = newTextObj.GetComponent<TMP_Text>();
 
-        newMessage.textObj.text = newMessage.text;
+        newMessage.textObj.text = newMessage.ToString();
 
-        messageList.Add(newMessage);
-    }
+        foreach (FPSPlayerManager p in FindObjectsOfType<FPSPlayerManager>())
+        {
+            p.messageList.Add(newMessage);
+        }
+    }*/
 }
 
+/*
 [System.Serializable]
 public class Message
 {
@@ -363,3 +372,4 @@ public class Message
         return text;
     }
 }
+*/

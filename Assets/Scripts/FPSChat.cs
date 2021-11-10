@@ -8,17 +8,22 @@ using Photon.Pun;
 
 public class FPSChat : MonoBehaviour
 {
+    public static FPSChat instance { get; set;  }
+
     /*
     public TMP_InputField input;
     public TMP_Text playerNameField;
-    public GameObject panel, textPrefab;
     //public FPSPlayerManager player;
+    */
 
-    public int maxMessages = 4;
+    public RectTransform TextHolder;
+    public GameObject textPrefab;
+    public int maxMessages = 10;
 
     [SerializeField]
     public List<Message> messageList = new List<Message>();
 
+    /*
     public static FPSChat instance { get; set; }
 
     void Awake()
@@ -56,6 +61,12 @@ public class FPSChat : MonoBehaviour
             //player.canMove = true;
         }
     }
+    */
+
+    void Awake()
+    {
+        instance = this;
+    }
 
     public void SendMessageToChat(string text)
     {
@@ -69,7 +80,7 @@ public class FPSChat : MonoBehaviour
 
         newMessage.text = text;
 
-        GameObject newTextObj = Instantiate(textPrefab, panel.transform);
+        GameObject newTextObj = Instantiate(textPrefab, TextHolder);
 
         newMessage.textObj = newTextObj.GetComponent<TMP_Text>();
 
@@ -77,18 +88,17 @@ public class FPSChat : MonoBehaviour
 
         messageList.Add(newMessage);
     }
-    */
 }
 
-/*
+
 [System.Serializable]
 public class Message
 {
-public string text;
-public TMP_Text textObj;
+    public string text;
+    public TMP_Text textObj;
 
-public override string ToString()
-{
-    return text;
+    public override string ToString()
+    {
+        return text;
+    }
 }
-}*/

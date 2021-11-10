@@ -13,12 +13,13 @@ public class FPSGameManager : MonoBehaviour
     public List<GameObject> spawnPoints = new List<GameObject>();
 
     public TextMeshProUGUI timer;
-    public FPSPlayerManager temp;
 
     public float matchTime = 60.0f;
     bool isTimerRunning = true;
     GameObject player;
     List<FPSPlayerManager> players = new List<FPSPlayerManager>();
+    FPSPlayerManager temp;
+    public TMP_InputField input;
 
     public static FPSGameManager instance { get; set; }
 
@@ -75,8 +76,6 @@ public class FPSGameManager : MonoBehaviour
                 isTimerRunning = false;
                 //PhotonNetwork.LeaveRoom();
 
-                PhotonManager.instance.gameObject.GetPhotonView().RPC("LoadLobby", RpcTarget.All);
-
                 foreach (FPSPlayerManager p in FindObjectsOfType<FPSPlayerManager>())
                 {
                     players.Add(p);
@@ -84,7 +83,7 @@ public class FPSGameManager : MonoBehaviour
 
                 if (players.Count != 1)
                 {
-                    for (int i = 1; i < players.Count + 1; i++)
+                    for (int i = 1; i < players.Count; i++)
                     {
                         temp = players[i];
 
@@ -98,6 +97,11 @@ public class FPSGameManager : MonoBehaviour
                 {
                     temp = players[0];
                 }
+
+                Username.instance.winnerKills = temp.kills;
+                Username.instance.winnerName = temp.nameText.text;
+
+                PhotonManager.instance.gameObject.GetPhotonView().RPC("LoadLobby", RpcTarget.All);
             }
         }
     }

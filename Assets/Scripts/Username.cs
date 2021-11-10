@@ -15,8 +15,12 @@ public class Username : MonoBehaviour
 	public TMP_Text timer;
 	public TMP_Text winnerText;
 
+	public int winnerKills;
+	public string winnerName;
+
 	public float time = 20f;
 	bool isTimerRunning = true;
+	bool firstLoad = true;
 
 	public static Username instance { get; set; }
 
@@ -36,11 +40,16 @@ public class Username : MonoBehaviour
         {
 			startButton.SetActive(false);
         }
+
+		winnerText.gameObject.SetActive(false);
 	}
 
     void Start()
     {
-		PhotonManager.instance.gameObject.GetPhotonView().RPC("ShowWinner", RpcTarget.All, FPSGameManager.instance.temp.nameText.text, FPSGameManager.instance.temp.kills);
+		if(!firstLoad)
+		{
+			PhotonManager.instance.gameObject.GetPhotonView().RPC("ShowWinner", RpcTarget.All, winnerName, winnerKills);
+		}
 	}
 
     void Update()
@@ -90,6 +99,8 @@ public class Username : MonoBehaviour
     {
 		if(PhotonNetwork.IsMasterClient)
         {
+			firstLoad = false;
+			winnerText.gameObject.SetActive(true);
 			PhotonNetwork.LoadLevel(gameLevel);
         }
     }
