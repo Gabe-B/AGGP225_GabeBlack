@@ -334,42 +334,4 @@ public class FPSPlayerManager : MonoBehaviour
         }
     }
     #endregion
-
-    /*public void SendMessageToChat(string text)
-    {
-        if (messageList.Count >= maxMessages)
-        {
-            Destroy(messageList[0].textObj.gameObject);
-            messageList.Remove(messageList[0]);
-        }
-
-        Message newMessage = new Message();
-
-        newMessage.text = text;
-
-        GameObject newTextObj = Instantiate(textPrefab, panel.transform);
-
-        newMessage.textObj = newTextObj.GetComponent<TMP_Text>();
-
-        newMessage.textObj.text = newMessage.ToString();
-
-        foreach (FPSPlayerManager p in FindObjectsOfType<FPSPlayerManager>())
-        {
-            p.messageList.Add(newMessage);
-        }
-    }*/
 }
-
-/*
-[System.Serializable]
-public class Message
-{
-    public string text;
-    public TMP_Text textObj;
-
-    public override string ToString()
-    {
-        return text;
-    }
-}
-*/
