@@ -3474,7 +3474,7 @@ MonoBehaviour:
   playerObj: {fileID: 9026369134754097657}
   rb: {fileID: 9026369134754097661}
   playerCam: {fileID: 2807881265547720656}
-  vertSensitivity: 20
+  vertSensitivity: 7
   horizSensitivity: 1000
   moveSpeed: 25
   playerGrav: -250
